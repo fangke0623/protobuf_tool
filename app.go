@@ -413,13 +413,30 @@ cd "%s"
 	var cmdErr2 error
 	var cmdErr3 error
 
-	// Simplified approach: just use one command with source_relative
+	// Get all proto files in pb directory
+	pbFiles, err := filepath.Glob(filepath.Join(appRoot, "pb", "*.proto"))
+	if err != nil {
+		debugInfo += fmt.Sprintf("\nError finding proto files: %v", err)
+		return fmt.Sprintf("Error finding proto files: %v\n%s", err, debugInfo)
+	}
+
+	// Convert to relative paths
+	relPbFiles := make([]string, len(pbFiles))
+	for i, file := range pbFiles {
+		rel, err := filepath.Rel(appRoot, file)
+		if err != nil {
+			rel = filepath.Base(file)
+		}
+		relPbFiles[i] = rel
+	}
+
+	// Simplified approach: just use one command with source_relative for all proto files
 	// This is the most reliable way for simple cases
 	cmdArgs := []string{
 		fmt.Sprintf("--go_out=paths=source_relative:%s", outputDir),
 		fmt.Sprintf("--go-grpc_out=paths=source_relative:%s", outputDir),
-		relPbPath,
 	}
+	cmdArgs = append(cmdArgs, relPbFiles...)
 
 	debugInfo += fmt.Sprintf("\nTrying approach: Simple source_relative")
 
@@ -444,8 +461,8 @@ cd "%s"
 			"--proto_path=.",
 			fmt.Sprintf("--go_out=paths=source_relative:%s", outputDir),
 			fmt.Sprintf("--go-grpc_out=paths=source_relative:%s", outputDir),
-			relPbPath,
 		}
+		cmdArgs2 = append(cmdArgs2, relPbFiles...)
 
 		cmd2 := exec.Command(scriptPath, cmdArgs2...)
 		output2, err2 := cmd2.CombinedOutput()
@@ -467,10 +484,13 @@ cd "%s"
 		cmdArgs3 := []string{
 			fmt.Sprintf("--go_out=paths=source_relative:%s", outputDir),
 			fmt.Sprintf("--go-grpc_out=paths=source_relative:%s", outputDir),
-			fmt.Sprintf("--go_opt=M%s=.", relPbPath),
-			fmt.Sprintf("--go-grpc_opt=M%s=.", relPbPath),
-			relPbPath,
 		}
+		// Add M options for each proto file
+		for _, file := range relPbFiles {
+			cmdArgs3 = append(cmdArgs3, fmt.Sprintf("--go_opt=M%s=.", file))
+			cmdArgs3 = append(cmdArgs3, fmt.Sprintf("--go-grpc_opt=M%s=.", file))
+		}
+		cmdArgs3 = append(cmdArgs3, relPbFiles...)
 
 		cmd3 := exec.Command(scriptPath, cmdArgs3...)
 		output3, err3 := cmd3.CombinedOutput()

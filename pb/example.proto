@@ -2,8 +2,12 @@ syntax = "proto3";
 
 package example;
 
+option go_package = "pb-tool/grpc_output/pb";
+
 // Import google api annotations for HTTP routes
 import "google/api/annotations.proto";
+// Import custom options for method annotations
+import "custom_options.proto";
 
 // Example message
 message Example {
@@ -14,8 +18,9 @@ message Example {
 
 // Example service with full custom routes
 service ExampleService {
-  // GetExample with custom GET routes
+  // GetExample with custom GET routes - 可以被内部服务请求
   rpc GetExample (GetExampleRequest) returns (Example) {
+    option (example.publish) = true;
     option (google.api.http) = {
       get: "/v1/examples/{id}"
       additional_bindings: {
@@ -24,8 +29,9 @@ service ExampleService {
     };
   }
 
-  // CreateExample with custom POST routes
+  // CreateExample with custom POST routes - 不可以被内部服务请求
   rpc CreateExample (Example) returns (Example) {
+    option (example.publish) = false;
     option (google.api.http) = {
       post: "/v1/examples"
       body: "*"
@@ -36,8 +42,9 @@ service ExampleService {
     };
   }
 
-  // UpdateExample with custom PUT routes
+  // UpdateExample with custom PUT routes - 可以被内部服务请求
   rpc UpdateExample (Example) returns (Example) {
+    option (example.publish) = true;
     option (google.api.http) = {
       put: "/v1/examples/{id}"
       body: "*"
@@ -48,8 +55,9 @@ service ExampleService {
     };
   }
 
-  // DeleteExample with custom DELETE routes
+  // DeleteExample with custom DELETE routes - 不可以被内部服务请求
   rpc DeleteExample (GetExampleRequest) returns (DeleteExampleResponse) {
+    option (example.publish) = false;
     option (google.api.http) = {
       delete: "/v1/examples/{id}"
       additional_bindings: {
@@ -58,8 +66,9 @@ service ExampleService {
     };
   }
 
-  // ListExamples with custom GET routes
+  // ListExamples with custom GET routes - 可以被内部服务请求
   rpc ListExamples (ListExamplesRequest) returns (ListExamplesResponse) {
+    option (example.publish) = true;
     option (google.api.http) = {
       get: "/v1/examples"
       additional_bindings: {

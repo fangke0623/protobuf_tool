@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package example;
+
+option go_package = "pb-tool/grpc_output/pb";
+
+import "google/protobuf/descriptor.proto";
+
+// 自定义方法选项：用于标记接口是否可以被内部服务请求
+extend google.protobuf.MethodOptions {
+  // 标记接口是否可以被内部服务请求，默认为true
+  bool publish = 10001;
+}
