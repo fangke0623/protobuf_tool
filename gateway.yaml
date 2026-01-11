@@ -1,0 +1,20 @@
+type: google.api.Service
+config_version: 3
+
+title: Example Service API
+description: Example service with custom routes
+
+http:
+  rules:
+    - selector: example.ExampleService.GetExample
+      get: /api/v1/examples/{id}
+      additional_bindings:
+        - get: /api/examples/{id}
+    - selector: example.ExampleService.CreateExample
+      post: /api/v1/examples
+      additional_bindings:
+        - post: /api/examples
+    - selector: example.ExampleService.UpdateExample
+      put: /api/v1/examples/{id}
+    - selector: example.ExampleService.DeleteExample
+      delete: /api/v1/examples/{id}

@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package example;
+
+// Import google api annotations for HTTP routes
+import "google/api/annotations.proto";
+
+// Example message
+message Example {
+  string id = 1;
+  string name = 2;
+  int32 value = 3;
+}
+
+// Example service with full custom routes
+service ExampleService {
+  // GetExample with custom GET routes
+  rpc GetExample (GetExampleRequest) returns (Example) {
+    option (google.api.http) = {
+      get: "/v1/examples/{id}"
+      additional_bindings: {
+        get: "/examples/{id}"
+      }
+    };
+  }
+
+  // CreateExample with custom POST routes
+  rpc CreateExample (Example) returns (Example) {
+    option (google.api.http) = {
+      post: "/v1/examples"
+      body: "*"
+      additional_bindings: {
+        post: "/examples"
+        body: "*"
+      }
+    };
+  }
+
+  // UpdateExample with custom PUT routes
+  rpc UpdateExample (Example) returns (Example) {
+    option (google.api.http) = {
+      put: "/v1/examples/{id}"
+      body: "*"
+      additional_bindings: {
+        put: "/examples/{id}"
+        body: "*"
+      }
+    };
+  }
+
+  // DeleteExample with custom DELETE routes
+  rpc DeleteExample (GetExampleRequest) returns (DeleteExampleResponse) {
+    option (google.api.http) = {
+      delete: "/v1/examples/{id}"
+      additional_bindings: {
+        delete: "/examples/{id}"
+      }
+    };
+  }
+
+  // ListExamples with custom GET routes
+  rpc ListExamples (ListExamplesRequest) returns (ListExamplesResponse) {
+    option (google.api.http) = {
+      get: "/v1/examples"
+      additional_bindings: {
+        get: "/examples"
+      }
+    };
+  }
+}
+
+// Request and Response messages
+message GetExampleRequest {
+  string id = 1;
+}
+
+message DeleteExampleResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListExamplesRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message ListExamplesResponse {
+  repeated Example examples = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
